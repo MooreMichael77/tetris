@@ -1,3 +1,4 @@
+
 /**
  *
  * @author 
@@ -17,6 +18,7 @@ package tetris;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
@@ -31,6 +33,8 @@ public class PlayField extends JPanel implements ActionListener
 {
     public static final int playFieldWidth = 10;
     public static final int playFieldHeight = 22;
+    public static final int nextFieldWidth = 6;
+    public static final int nextFieldHeight = 4;
 
     protected Piece currentPiece;
     protected Piece nextPiece;
@@ -44,6 +48,7 @@ public class PlayField extends JPanel implements ActionListener
     private int score = 0;
     private int linesCleared = 0;
     protected static Square[][] playField;    
+    protected static Square[][] nextField;
     
     private JPanel menuPanel;
     private JPanel infoPanel;
@@ -57,8 +62,11 @@ public class PlayField extends JPanel implements ActionListener
     private JLabel scoreLabel;
     private JLabel highScoreLabel;
     
+    private Font font;
+    
     public PlayField() 
     {
+        font = new Font("Courier", Font.BOLD, 48);
         newGameButton = new JButton("New Game");
         viewHighScoresButton = new JButton("View High Scores");
         quitButton = new JButton("Quit");
@@ -151,10 +159,12 @@ public class PlayField extends JPanel implements ActionListener
     {
         // Next piece becomes current, generate new next, place new current on board, start timer
         timer.stop();
+        removeNextPieceFromBoard();
         currentPiece = nextPiece;
         nextPiece = new Piece();
         nextPiece.createPiece();
         setPieceToBoard(true);
+        setNextPieceToBoard();
         timer.start();        
     }
 
@@ -175,18 +185,28 @@ public class PlayField extends JPanel implements ActionListener
     public void paint(Graphics g)
     { 
         // If the game is paused or viewing high scores, do not paint the playfield
-        if (Tetris.gameState == gamePlaying || gameOver)
+        if ((Tetris.gameState == gamePlaying) || (gameOver == true))
         {
             // Color each Square with it's color
             super.paint(g);
             Graphics2D g2d = (Graphics2D) g;
 
+            Color color = Square.colors[0];
+            int nextStringX = 600;
+            int nextStringY = 290;
+            
+            g2d.setFont(font);
+            g2d.drawString("NEXT", nextStringX, nextStringY);
+            
             int squareDimension = 30;
             // Center-ish the playfield
             int x = (800 - (squareDimension * playFieldWidth)) / 2;
             int y = (750 - (squareDimension * playFieldHeight)) / 2;
 
-            Color color = Square.colors[0];
+            int nextX = 575;
+            int nextY = 300;
+            
+            color = Square.colors[0];
 
             for (int height = playFieldHeight - 1; height >= 0; height--) 
             {
@@ -200,6 +220,17 @@ public class PlayField extends JPanel implements ActionListener
 
                 y += squareDimension;
             }  
+            
+            for (int height = nextFieldHeight - 1; height >= 0; height--)
+            {
+                for (int width = 0; width < nextFieldWidth; width++)
+                {
+                    g2d.setColor(color);
+                    g2d.fillRect(nextX + (width * squareDimension), nextY, squareDimension, squareDimension);
+                    g2d.drawRect(nextX + (width * squareDimension), nextY, squareDimension, squareDimension);                    
+                }                
+                nextY += squareDimension;
+            }
             
             x = (800 - (squareDimension * playFieldWidth)) / 2;
             y = (750 - (squareDimension * playFieldHeight)) / 2;
@@ -220,6 +251,30 @@ public class PlayField extends JPanel implements ActionListener
 
                 y += squareDimension;
             } 
+
+            nextX = 575;
+            nextY = 300;
+            
+            
+            for (int height = nextFieldHeight - 1; height >= 0; height--)
+            {
+                for (int width = 0; width < nextFieldWidth; width++)
+                {
+                    if (nextField[width][height].isOccupied())
+                    {
+                        // Draw a solid square, then a black outline so we can see the seperate squares
+                        color = nextField[width][height].getColor();
+                        g2d.setColor(color);  
+                        g2d.fillRect(nextX + (width * squareDimension), nextY, squareDimension, squareDimension);
+                        g2d.setColor(Square.colors[0]);
+                        g2d.drawRect(nextX + (width * squareDimension), nextY, squareDimension, squareDimension);
+                    }
+                }
+                
+                nextY += squareDimension;
+            }
+            
+            
         }
         else
         {
@@ -270,10 +325,79 @@ public class PlayField extends JPanel implements ActionListener
             playField[x][y].setOccupied(false);
         }             
     }
+
+    public void setNextPieceToBoard()
+    {
+        // The Squares the currentPiece occupy need to be marked with the Square 
+        //    attributes. If stillActive is false, the piece has landed
+        int pieceCounter = nextPiece.getPiece().ordinal();
+        
+        int x;
+        int y;
+        
+        for (int outerCounter = 0; outerCounter < pieceMaxWidth; outerCounter++)
+        {
+            if (((pieceCounter > 0) && (pieceCounter < 4)) || (pieceCounter == 6))
+            {
+                // Get the current x,y of the piece
+                x = nextPiece.rotateMatrix[pieceCounter][outerCounter][0] + 2;
+                y = nextPiece.rotateMatrix[pieceCounter][outerCounter][1] + 1;
+            }
+            else if ((pieceCounter > 3) && (pieceCounter < 6))
+            {
+                x = nextPiece.rotateMatrix[pieceCounter][outerCounter][0] + 2;
+                y = nextPiece.rotateMatrix[pieceCounter][outerCounter][1] + 2;
+            }
+            else
+            {
+                x = nextPiece.rotateMatrix[pieceCounter][outerCounter][0] + 3;
+                y = nextPiece.rotateMatrix[pieceCounter][outerCounter][1] + 2;
+            }
+
+            // Set the attributes of the x,y
+            nextField[x][y].setColor(nextPiece.getColor());
+            nextField[x][y].setOccupied(true);
+        }        
+    }
+    
+    public void removeNextPieceFromBoard()
+    {
+        // The piece is active, reset the squares that it occupies so it can be
+        //    reset on its new position
+        
+        int pieceCounter = nextPiece.getPiece().ordinal();
+        
+        int x;
+        int y;
+        for (int outerCounter = 0; outerCounter < pieceMaxWidth; outerCounter++)
+        {
+            if (((pieceCounter > 0) && (pieceCounter < 4)) || (pieceCounter == 6))
+            {
+                // Get the current x,y of the piece
+                x = nextPiece.rotateMatrix[pieceCounter][outerCounter][0] + 2;
+                y = nextPiece.rotateMatrix[pieceCounter][outerCounter][1] + 1;
+            }
+            else if ((pieceCounter > 3) && (pieceCounter < 6))
+            {
+                x = nextPiece.rotateMatrix[pieceCounter][outerCounter][0] + 2;
+                y = nextPiece.rotateMatrix[pieceCounter][outerCounter][1] + 2;
+            }
+            else
+            {
+                x = nextPiece.rotateMatrix[pieceCounter][outerCounter][0] + 3;
+                y = nextPiece.rotateMatrix[pieceCounter][outerCounter][1] + 2;
+            }
+            
+            // Reset thoses squares
+            nextField[x][y].setColor(Color.BLACK);
+            nextField[x][y].setOccupied(false);
+        }             
+    }    
     
     public void start()
     {
         Tetris.gameState = gamePlaying;
+        
         // Initalize the playField
         playField = new Square[playFieldWidth][playFieldHeight];       
         for (int width = 0; width < playFieldWidth; width++) 
@@ -283,12 +407,23 @@ public class PlayField extends JPanel implements ActionListener
                 playField[width][height] = new Square();
             }
         }
-               
+        
+        nextField = new Square[nextFieldWidth][nextFieldHeight];
+        
+        for (int width = 0; width < nextFieldWidth; width++)
+        {
+            for (int height = 0; height < nextFieldHeight; height++)
+            {
+                nextField[width][height] = new Square();
+            }
+        }
+        
         currentPiece = new Piece();
         currentPiece.createPiece();
         nextPiece = new Piece();
         nextPiece.createPiece();        
         setPieceToBoard(true);
+        setNextPieceToBoard();
 
         timer = new Timer(1000, this);
         timer.start();
@@ -392,6 +527,7 @@ public class PlayField extends JPanel implements ActionListener
                 {
                     gameOver = true;
                     hidePlayField();
+                    removeNextPieceFromBoard();
                     infoPanel.setVisible(false);
                     menuPanel.setVisible(false); 
                     highScoreLabel.setVisible(true);
@@ -519,8 +655,9 @@ public class PlayField extends JPanel implements ActionListener
                        playField[x1][y1].setOccupied(false);
                        playField[x1][y1].setColor(Color.BLACK);
                        }
-
+                        
                     }
+                    y = y-1;
                 }
             }
         }

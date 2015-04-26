@@ -25,7 +25,7 @@ public class Piece
     public static final int pieceMaxWidth = 4;
 
     protected int[][][] matrixArray;
-    private int[][][] rotateMatrix;
+    protected int[][][] rotateMatrix;
     
     private gamePieces shape;
     private Color color;
