@@ -62,11 +62,13 @@ public class PlayField extends JPanel implements ActionListener
     private JLabel scoreLabel;
     private JLabel highScoreLabel;
     
-    private Font font;
+    private Font titleFont;
+    private Font scoreFont;
     
     public PlayField() 
     {
-        font = new Font("Courier", Font.BOLD, 48);
+        titleFont = new Font("Courier", Font.BOLD, 48);
+        scoreFont = new Font("Courier", Font.BOLD, 24);
         newGameButton = new JButton("New Game");
         viewHighScoresButton = new JButton("View High Scores");
         quitButton = new JButton("Quit");
@@ -87,13 +89,12 @@ public class PlayField extends JPanel implements ActionListener
         okButton.setVisible(false);
         
         linesLabel = new JLabel("Lines: " + linesCleared);
-        levelLabel = new JLabel("Level: " + level);
-        scoreLabel = new JLabel("Score: " + score);
+        linesLabel.setFont(scoreFont);
+        //levelLabel = new JLabel("Level: " + level);
+        //scoreLabel = new JLabel("Score: " + score);
 
         infoPanel = new JPanel();
         infoPanel.add(linesLabel);
-        infoPanel.add(levelLabel);
-        infoPanel.add(scoreLabel);
         infoPanel.setVisible(false);
         infoPanel.setBackground(Color.WHITE);
         add(infoPanel);
@@ -190,13 +191,31 @@ public class PlayField extends JPanel implements ActionListener
             // Color each Square with it's color
             super.paint(g);
             Graphics2D g2d = (Graphics2D) g;
-
-            Color color = Square.colors[0];
-            int nextStringX = 600;
-            int nextStringY = 290;
             
-            g2d.setFont(font);
-            g2d.drawString("NEXT", nextStringX, nextStringY);
+            // Paint the score area
+            Color color = Square.colors[0];
+           
+            int statsStringX = 600;
+            int statsStringY = 70;
+
+            g2d.setFont(scoreFont);
+            g2d.drawString("TOP", statsStringX, statsStringY);
+            // Change this to top high score
+            //g2d.drawString(String.valueOf(score), statsStringX, statsStringY + 25);
+            g2d.drawString("SCORE", statsStringX, statsStringY + 60);
+            g2d.drawString(String.valueOf(score), statsStringX, statsStringY + 85);
+            
+            // Paint the next piece area
+            statsStringX = 600;
+            statsStringY = 290;
+            
+            g2d.setFont(titleFont);
+            g2d.drawString("NEXT", statsStringX, statsStringY);
+            
+            // Paint the level area
+            g2d.setFont(scoreFont);
+            g2d.drawString("LEVEL", statsStringX, statsStringY + 200);
+            g2d.drawString(String.valueOf(level), statsStringX + 35, statsStringY + 225);
             
             int squareDimension = 30;
             // Center-ish the playfield
@@ -206,7 +225,7 @@ public class PlayField extends JPanel implements ActionListener
             int nextX = 575;
             int nextY = 300;
             
-            color = Square.colors[0];
+            //color = Square.colors[0];
 
             for (int height = playFieldHeight - 1; height >= 0; height--) 
             {
@@ -596,7 +615,7 @@ public class PlayField extends JPanel implements ActionListener
     
     public void rotate(boolean rotateLeft)
     {
-        System.out.println(currentPiece.getPiece().ordinal());
+        //System.out.println(currentPiece.getPiece().ordinal());
         if (currentPiece.getPiece().ordinal() != 6)
         {
             {
@@ -637,27 +656,27 @@ public class PlayField extends JPanel implements ActionListener
                 if( isCleared == true && x == playFieldWidth-1)
                 {
                     multiplier = multiplier + 1;
-                   // System.out.println("Resetting the boxes");
+                    // System.out.println("Resetting the boxes");
                     //reset all the squares on the line to default color                      
-                    for(x1 = 0; x1 < playFieldWidth ; x1 ++){
+                    for(x1 = 0; x1 < playFieldWidth ; x1 ++)
+                    {
                        playField[x1][y].setOccupied(false);
                        playField[x1][y].setColor(Color.BLACK);
-                                                           }
+                    }
                     //reset all the square on the line above the line cleared to drop the pieces                      
                     for(y1 = y+1; y1 < playFieldHeight; y1++)
                     {
 
-                       for(x1 = 0; x1 < playFieldWidth ; x1++)
-                       {
-                      // System.out.println("Get ready were inside at Y:" + y1 + "X1: " + x1);
-                       playField[x1][y1-1].setOccupied(playField[x1][y1].isOccupied());
-                       playField[x1][y1-1].setColor(playField[x1][y1].getColor());
-                       playField[x1][y1].setOccupied(false);
-                       playField[x1][y1].setColor(Color.BLACK);
-                       }
-                        
+                        for(x1 = 0; x1 < playFieldWidth ; x1++)
+                        {
+                        // System.out.println("Get ready were inside at Y:" + y1 + "X1: " + x1);
+                        playField[x1][y1-1].setOccupied(playField[x1][y1].isOccupied());
+                        playField[x1][y1-1].setColor(playField[x1][y1].getColor());
+                        playField[x1][y1].setOccupied(false);
+                        playField[x1][y1].setColor(Color.BLACK);
+                        }                        
                     }
-                    y = y-1;
+                    y = y - 1;
                 }
             }
         }
@@ -710,13 +729,13 @@ public class PlayField extends JPanel implements ActionListener
 
         //Testing scoring logic
         score = score + newPoints;
-        System.out.println("Your score is " + score);
-        System.out.println("Your # of lines cleared is " + linesCleared);
-        System.out.println("Your level is " + level);
+        //System.out.println("Your score is " + score);
+        //System.out.println("Your # of lines cleared is " + linesCleared);
+        //System.out.println("Your level is " + level);
         //Update what is displayed
         linesLabel.setText("Lines: " + linesCleared);
         levelLabel.setText("Level: " + level);
-        scoreLabel.setText("Score: " + score);
+        //scoreLabel.setText("Score: " + score);
     }
        
     @Override
