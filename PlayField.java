@@ -1,4 +1,3 @@
-
 /**
  *
  * @author 
@@ -6,11 +5,11 @@
  * Michael Moore
  * David Nard
  * Graham Taylor
- * Last Updated 4/19/2015, NetBeans IDE 8.0.2
+ * Last Updated 4/26/2015, NetBeans IDE 8.0.2
  * CMSC 495
- * Phase 1 Source
+ * Phase 2 Source
  * 
- * Week 5
+ * Week 6
  * Spring OL1 2014
  */
 
@@ -44,9 +43,12 @@ public class PlayField extends JPanel implements ActionListener
     private boolean isPaused = false;
     private boolean hasStarted = false;
     private boolean gameOver = false;
-    private int level = 0;
+    
+    private int level = 0;    
     private int score = 0;
     private int linesCleared = 0;
+    private int timerDelay = 800;
+    
     protected static Square[][] playField;    
     protected static Square[][] nextField;
     
@@ -58,8 +60,6 @@ public class PlayField extends JPanel implements ActionListener
     private JButton okButton;
     
     private JLabel linesLabel;
-    private JLabel levelLabel;
-    private JLabel scoreLabel;
     private JLabel highScoreLabel;
     
     private Font titleFont;
@@ -69,6 +69,7 @@ public class PlayField extends JPanel implements ActionListener
     {
         titleFont = new Font("Courier", Font.BOLD, 48);
         scoreFont = new Font("Courier", Font.BOLD, 24);
+        
         newGameButton = new JButton("New Game");
         viewHighScoresButton = new JButton("View High Scores");
         quitButton = new JButton("Quit");
@@ -90,8 +91,6 @@ public class PlayField extends JPanel implements ActionListener
         
         linesLabel = new JLabel("Lines: " + linesCleared);
         linesLabel.setFont(scoreFont);
-        //levelLabel = new JLabel("Level: " + level);
-        //scoreLabel = new JLabel("Score: " + score);
 
         infoPanel = new JPanel();
         infoPanel.add(linesLabel);
@@ -274,7 +273,7 @@ public class PlayField extends JPanel implements ActionListener
             nextX = 575;
             nextY = 300;
             
-            
+            // Next piece area
             for (int height = nextFieldHeight - 1; height >= 0; height--)
             {
                 for (int width = 0; width < nextFieldWidth; width++)
@@ -291,9 +290,7 @@ public class PlayField extends JPanel implements ActionListener
                 }
                 
                 nextY += squareDimension;
-            }
-            
-            
+            }                        
         }
         else
         {
@@ -443,8 +440,8 @@ public class PlayField extends JPanel implements ActionListener
         nextPiece.createPiece();        
         setPieceToBoard(true);
         setNextPieceToBoard();
-
-        timer = new Timer(1000, this);
+        
+        timer = new Timer(timerDelay, this);
         timer.start();
 
         repaint();
@@ -479,8 +476,7 @@ public class PlayField extends JPanel implements ActionListener
             isPaused = false;
             topFrame.setTitle("CMSC495 Tetris Group -- Spring 2015");            
             timer.addActionListener(this);
-        }
-        
+        }        
     }
 
     public void moveDown(boolean hardDrop)
@@ -563,8 +559,7 @@ public class PlayField extends JPanel implements ActionListener
         } while (hasLanded == false && hardDrop);
         
         // Reset for next piece
-        hasLanded = false;
-        
+        hasLanded = false;        
     }
     
     public void moveSide(int direction)
@@ -631,12 +626,14 @@ public class PlayField extends JPanel implements ActionListener
         // Check each Y and X for occupied squares on the playfield
         //If all square are occupied then clear the playfield
         //System.out.println("Inside clear Lines");
-        int multiplier = 0;//multiplier variable applied to clearing a line 
         boolean isCleared = false;
+        
+        int multiplier = 0;//multiplier variable applied to clearing a line 
         int x;
         int y;
         int x1;
         int y1;
+        
         for ( y = 0; y < playFieldHeight; y++  )
         {
             //check if each horizontal is occupied
@@ -692,31 +689,50 @@ public class PlayField extends JPanel implements ActionListener
     public void updateGameStats(int multiplier)
     {
         int newPoints = 0; // used to get the amount of points that is being added to curren score
+        int oldLevel = level;
+        
         //Update the # of lineCleared
         linesCleared = linesCleared + multiplier;
+        
         //Update the level if applicable
-        switch(linesCleared)
+       
+        level = Math.floorDiv(linesCleared, 100);
+        
+        if (level < 9)
         {
-            case 100: level = 1; break;
-            case 200: level = 2; break;
-            case 300: level = 3; break;
-            case 400: level = 4; break;
-            case 500: level = 5; break;
-            case 600: level = 6; break;
-            case 700: level = 7; break;
-            case 800: level = 8; break;
-            case 900: level = 9; break;
-            case 1000: level = 10; break;
-            case 1100: level = 11; break;
-            case 1200: level = 12; break;
-            case 1300: level = 13; break;
-            case 1400: level = 14; break;
-            case 1500: level = 15; break;
-            case 1600: level = 16; break;
-            case 1700: level = 17; break;
-            case 1800: level = 18; break;
-            case 1900: level = 19; break;    
+            if (level > oldLevel)
+            {
+                timerDelay -= 83;
+            }
         }
+        else if (level == 9)
+        {
+            timerDelay -= 166;            
+        }
+        
+        else if (level >= 10 && level <= 12)
+        {
+            timerDelay -= 83;
+        }
+        else if (level >= 13 && level <= 15)
+        {
+            timerDelay -= 83;
+        }
+        else if (level >= 16 && level <= 18)
+        {
+            timerDelay -= 83;
+        }
+        else if (level >= 19 && level <= 28)
+        {
+            timerDelay -= 83;
+        }
+        else
+        {
+            timerDelay = 83;
+        }
+
+        timer.setDelay(timerDelay);
+        // System.out.println("timer =  " + timer.getDelay());
         
         //Update the score
         switch(multiplier)
@@ -734,7 +750,7 @@ public class PlayField extends JPanel implements ActionListener
         //System.out.println("Your level is " + level);
         //Update what is displayed
         linesLabel.setText("Lines: " + linesCleared);
-        levelLabel.setText("Level: " + level);
+        //levelLabel.setText("Level: " + level);
         //scoreLabel.setText("Score: " + score);
     }
        
@@ -789,12 +805,12 @@ public class PlayField extends JPanel implements ActionListener
         @Override
         public void keyPressed(KeyEvent e) 
         {
-             int keyPress = e.getKeyCode();
+            int keyPress = e.getKeyCode();
 
-             if (keyPress == 'p' || keyPress == 'P') 
-             {
-                 pauseGame();
-             }
+            if (keyPress == 'p' || keyPress == 'P') 
+            {
+                pauseGame();
+            }
 
             if (!isPaused && Tetris.gameState == gamePlaying)
             {

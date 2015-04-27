@@ -5,11 +5,11 @@
  * Michael Moore
  * David Nard
  * Graham Taylor
- * Last Updated 4/19/2015, NetBeans IDE 8.0.2
+ * Last Updated 4/26/2015, NetBeans IDE 8.0.2
  * CMSC 495
- * Phase 1 Source
+ * Phase 2 Source
  * 
- * Week 5
+ * Week 6
  * Spring OL1 2014
  */
 
@@ -140,12 +140,12 @@ public class Piece
                     if (PlayField.playField[checkRotateMatrix[outerCounter][0]][checkRotateMatrix[outerCounter][1]].isOccupied() && 
                         !PlayField.playField[checkRotateMatrix[outerCounter][0]][checkRotateMatrix[outerCounter][1]].isActive())
                     {
-                        System.out.println("RETURN");
+                        // System.out.println("RETURN");
                         return;
                     }
                     else
                     {
-                        System.out.println(checkRotateMatrix[outerCounter][0] + " " + checkRotateMatrix[outerCounter][1]);
+                        // System.out.println(checkRotateMatrix[outerCounter][0] + " " + checkRotateMatrix[outerCounter][1]);
                     }
                 }    
                 
@@ -169,11 +169,11 @@ public class Piece
 
                     if (matrixArray[pieceCounter][outerCounter][0] < 0 || matrixArray[pieceCounter][outerCounter][0] >= PlayField.playFieldWidth)
                     {
-                        System.out.println("Side FALSE");
+                        // System.out.println("Side FALSE");
                     }
                     if (matrixArray[pieceCounter][outerCounter][1] < 0 || matrixArray[pieceCounter][outerCounter][0] >= PlayField.playFieldHeight)
                     {
-                        System.out.println("Top FALSE");
+                        // System.out.println("Top FALSE");
                     }
                 }
             }
@@ -201,19 +201,19 @@ public class Piece
                     else
                     {
                         goBack = true;
-                        System.out.println("BACK");
+                        // System.out.println("BACK");
                         checkRotateMatrix[outerCounter][0] = matrixArray[pieceCounter][1][0] - (-swapY);
                         checkRotateMatrix[outerCounter][1] = matrixArray[pieceCounter][1][1] - (swapX);                            
                     }
                     if (PlayField.playField[checkRotateMatrix[outerCounter][0]][checkRotateMatrix[outerCounter][1]].isOccupied() && 
                         !PlayField.playField[checkRotateMatrix[outerCounter][0]][checkRotateMatrix[outerCounter][1]].isActive())
                     {
-                        System.out.println("RETURN");
+                        // System.out.println("RETURN");
                         return;
                     }
                     else
                     {
-                        System.out.println(checkRotateMatrix[outerCounter][0] + " " + checkRotateMatrix[outerCounter][1]);
+                        // System.out.println(checkRotateMatrix[outerCounter][0] + " " + checkRotateMatrix[outerCounter][1]);
                     }
                 }                            
                 
@@ -239,11 +239,11 @@ public class Piece
 
                     if (matrixArray[pieceCounter][outerCounter][0] < 0 || matrixArray[pieceCounter][outerCounter][0] >= PlayField.playFieldWidth)
                     {
-                        System.out.println("Side FALSE");
+                        // System.out.println("Side FALSE");
                     }
                     if (matrixArray[pieceCounter][outerCounter][1] < 0 || matrixArray[pieceCounter][outerCounter][0] >= PlayField.playFieldHeight)
                     {
-                        System.out.println("Top FALSE");
+                        // System.out.println("Top FALSE");
                     }
                 }
             }   
@@ -270,7 +270,7 @@ public class Piece
                     else
                     {
                         goBack = true;
-                        System.out.println("BACK");
+                        // System.out.println("BACK");
                         checkRotateMatrix[outerCounter][0] = matrixArray[pieceCounter][1][0] - (-swapY);
                         checkRotateMatrix[outerCounter][1] = matrixArray[pieceCounter][1][1] - (swapX);                            
                     }
@@ -278,12 +278,12 @@ public class Piece
                         !PlayField.playField[checkRotateMatrix[outerCounter][0]][checkRotateMatrix[outerCounter][1]].isActive()) || 
                         ((rotateMatrix[pieceCounter][0][0] == 0) && (matrixArray[pieceCounter][outerCounter][0] < 2)))
                     {
-                        System.out.println("RETURN");
+                        // System.out.println("RETURN");
                         return;
                     }
                     else
                     {
-                        System.out.println(checkRotateMatrix[outerCounter][0] + " " + checkRotateMatrix[outerCounter][1]);
+                        // System.out.println(checkRotateMatrix[outerCounter][0] + " " + checkRotateMatrix[outerCounter][1]);
                     }
                 }                            
                 
@@ -309,11 +309,11 @@ public class Piece
 
                     if (matrixArray[pieceCounter][outerCounter][0] < 0 || matrixArray[pieceCounter][outerCounter][0] >= PlayField.playFieldWidth)
                     {
-                        System.out.println("Side FALSE");
+                        // System.out.println("Side FALSE");
                     }
                     if (matrixArray[pieceCounter][outerCounter][1] < 0 || matrixArray[pieceCounter][outerCounter][0] >= PlayField.playFieldHeight)
                     {
-                        System.out.println("Top FALSE");
+                        // System.out.println("Top FALSE");
                     }
                 }
             }               

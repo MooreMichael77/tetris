@@ -5,11 +5,11 @@
  * Michael Moore
  * David Nard
  * Graham Taylor
- * Last Updated 4/19/2015, NetBeans IDE 8.0.2
+ * Last Updated 4/26/2015, NetBeans IDE 8.0.2
  * CMSC 495
- * Phase 1 Source
+ * Phase 2 Source
  * 
- * Week 5
+ * Week 6
  * Spring OL1 2014
  */
 
