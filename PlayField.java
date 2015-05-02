@@ -34,7 +34,10 @@ public class PlayField extends JPanel implements ActionListener
     public static final int playFieldHeight = 22;
     public static final int nextFieldWidth = 6;
     public static final int nextFieldHeight = 4;
-
+    public static final int statsFieldWidth = 4;
+    public static final int statsFieldHeight = 19;
+    public static final int statsArrayLength = 8;
+    
     protected Piece currentPiece;
     protected Piece nextPiece;
     
@@ -51,6 +54,8 @@ public class PlayField extends JPanel implements ActionListener
     
     protected static Square[][] playField;    
     protected static Square[][] nextField;
+    protected static Square[][] statsField;
+    protected static int[] statsArray;
     
     private JPanel menuPanel;
     private JPanel infoPanel;
@@ -161,6 +166,7 @@ public class PlayField extends JPanel implements ActionListener
         timer.stop();
         removeNextPieceFromBoard();
         currentPiece = nextPiece;
+        statsArray[currentPiece.getPiece().ordinal()]++;
         nextPiece = new Piece();
         nextPiece.createPiece();
         setPieceToBoard(true);
@@ -216,6 +222,8 @@ public class PlayField extends JPanel implements ActionListener
             g2d.drawString("LEVEL", statsStringX, statsStringY + 200);
             g2d.drawString(String.valueOf(level), statsStringX + 35, statsStringY + 225);
             
+            g2d.drawString("STATISTICS", 17, 90);
+            
             int squareDimension = 30;
             // Center-ish the playfield
             int x = (800 - (squareDimension * playFieldWidth)) / 2;
@@ -249,6 +257,23 @@ public class PlayField extends JPanel implements ActionListener
                 }                
                 nextY += squareDimension;
             }
+            
+            // Paint the stats
+            x = 25;
+            y = 100;
+            color = Square.colors[0];
+            for (int height = statsFieldHeight - 1; height >= 0; height--) 
+            {
+                for (int width = 0; width < statsFieldWidth; width++) 
+                {
+                    // Draw a solid square, then a black outline so we can see the seperate squares
+                    g2d.setColor(color);
+                    g2d.fillRect(x + (width * squareDimension), y, squareDimension, squareDimension);
+                    g2d.drawRect(x + (width * squareDimension), y, squareDimension, squareDimension);
+                }
+
+                y += squareDimension;
+            }                        
             
             x = (800 - (squareDimension * playFieldWidth)) / 2;
             y = (750 - (squareDimension * playFieldHeight)) / 2;
@@ -290,7 +315,43 @@ public class PlayField extends JPanel implements ActionListener
                 }
                 
                 nextY += squareDimension;
-            }                        
+            }                      
+            
+            // Paint the stats
+            x = 25;
+            y = 100;
+            int counter = 1;
+            for (int height = statsFieldHeight - 1; height >= 0; height--) 
+            {
+                for (int width = 0; width < statsFieldWidth; width++) 
+                {
+                    // Draw a solid square, then a black outline so we can see the seperate squares
+                    color = statsField[width][height].getColor();
+                    g2d.setColor(color);
+                    g2d.fillRect(x + (width * squareDimension), y, squareDimension, squareDimension);
+                    g2d.setColor(Square.colors[0]);
+                    g2d.drawRect(x + (width * squareDimension), y, squareDimension, squareDimension);
+                }
+                
+                if (height % 3 == 0)
+                {
+                    x = squareDimension * 6;
+                    if (counter != 7)
+                    {
+                        g2d.drawString(String.valueOf(statsArray[counter]), x, y + (squareDimension * 2));
+                    }
+                    else
+                    {
+                        g2d.drawString(String.valueOf(statsArray[counter]), x, y + (squareDimension));
+                    }
+                    counter++;
+                    x = 25;
+                }
+                y += squareDimension;
+            } 
+            
+            
+            
         }
         else
         {
@@ -425,7 +486,6 @@ public class PlayField extends JPanel implements ActionListener
         }
         
         nextField = new Square[nextFieldWidth][nextFieldHeight];
-        
         for (int width = 0; width < nextFieldWidth; width++)
         {
             for (int height = 0; height < nextFieldHeight; height++)
@@ -434,8 +494,99 @@ public class PlayField extends JPanel implements ActionListener
             }
         }
         
+        statsField = new Square[statsFieldWidth][statsFieldHeight];
+        for (int width = 0; width < statsFieldWidth; width++)
+        {
+            for (int height = 0; height < statsFieldHeight; height++)
+            {
+                statsField[width][height] = new Square();
+            }
+        }
+        
+        statsArray = new int[statsArrayLength];
+        for (int counter = 0; counter < statsArrayLength; counter++)
+        {
+            statsArray[counter] = 0;
+        }
+        
+        // Setup IPiece stats
+        statsField[0][0].setColor(Square.colors[7]);
+        statsField[0][0].setOccupied(true);
+        statsField[1][0].setColor(Square.colors[7]);
+        statsField[1][0].setOccupied(true);
+        statsField[2][0].setColor(Square.colors[7]);
+        statsField[2][0].setOccupied(true);
+        statsField[3][0].setColor(Square.colors[7]);
+        statsField[3][0].setOccupied(true);        
+        
+        // Setup OPiece stats
+        statsField[1][2].setColor(Square.colors[6]);
+        statsField[1][2].setOccupied(true);
+        statsField[2][2].setColor(Square.colors[6]);
+        statsField[2][2].setOccupied(true);
+        statsField[1][3].setColor(Square.colors[6]);
+        statsField[1][3].setOccupied(true);
+        statsField[2][3].setColor(Square.colors[6]);
+        statsField[2][3].setOccupied(true);
+        
+        // Setup SPiece stats
+        statsField[1][5].setColor(Square.colors[5]);
+        statsField[1][5].setOccupied(true);
+        statsField[2][5].setColor(Square.colors[5]);
+        statsField[2][5].setOccupied(true);
+        statsField[2][6].setColor(Square.colors[5]);
+        statsField[2][6].setOccupied(true);
+        statsField[3][6].setColor(Square.colors[5]);
+        statsField[3][6].setOccupied(true);
+        
+        // Setup ZPiece stats
+        statsField[2][8].setColor(Square.colors[4]);
+        statsField[2][8].setOccupied(true);
+        statsField[3][8].setColor(Square.colors[4]);
+        statsField[3][8].setOccupied(true);
+        statsField[1][9].setColor(Square.colors[4]);
+        statsField[1][9].setOccupied(true);
+        statsField[2][9].setColor(Square.colors[4]);
+        statsField[2][9].setOccupied(true);
+        
+        // Setup TPiece stats
+        statsField[1][11].setColor(Square.colors[3]);
+        statsField[1][11].setOccupied(true);
+        statsField[2][11].setColor(Square.colors[3]);
+        statsField[2][11].setOccupied(true);
+        statsField[3][11].setColor(Square.colors[3]);
+        statsField[3][11].setOccupied(true);
+        statsField[2][12].setColor(Square.colors[3]);
+        statsField[2][12].setOccupied(true);
+        
+        // Setup LPiece stats
+        statsField[1][14].setColor(Square.colors[2]);
+        statsField[1][14].setOccupied(true);
+        statsField[2][14].setColor(Square.colors[2]);
+        statsField[2][14].setOccupied(true);
+        statsField[3][14].setColor(Square.colors[2]);
+        statsField[3][14].setOccupied(true);
+        statsField[3][15].setColor(Square.colors[2]);
+        statsField[3][15].setOccupied(true);
+        
+        // Setup JPiece stats
+        statsField[1][17].setColor(Square.colors[1]);
+        statsField[1][17].setOccupied(true);
+        statsField[2][17].setColor(Square.colors[1]);
+        statsField[2][17].setOccupied(true);
+        statsField[3][17].setColor(Square.colors[1]);
+        statsField[3][17].setOccupied(true);
+        statsField[1][18].setColor(Square.colors[1]);
+        statsField[1][18].setOccupied(true);
+        
+        for (int counter = 0; counter < statsArrayLength; counter++)
+        {
+            statsArray[counter] = 0;
+        }
+        
         currentPiece = new Piece();
         currentPiece.createPiece();
+        statsArray[currentPiece.getPiece().ordinal()]++;
         nextPiece = new Piece();
         nextPiece.createPiece();        
         setPieceToBoard(true);
