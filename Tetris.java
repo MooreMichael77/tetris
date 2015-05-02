@@ -16,6 +16,7 @@
 package tetris;
 
 import java.awt.Graphics;
+import java.io.IOException;
 import javax.swing.*;
 import static tetris.Tetris.GameState.mainMenu;
 
@@ -26,7 +27,7 @@ public class Tetris extends JFrame
       
     private PlayField playField;
     
-    public Tetris()
+    public Tetris() throws IOException
     {
         playField = new PlayField();
         add(playField);
@@ -39,7 +40,7 @@ public class Tetris extends JFrame
         playField.paint(g);
     }
     
-    public static void main(String[] args) 
+    public static void main(String[] args) throws IOException 
     {
         Tetris game = new Tetris();
         game.setTitle("CMSC495 Tetris Group -- Spring 2015");

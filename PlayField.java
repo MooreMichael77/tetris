@@ -15,8 +15,10 @@
 
 package tetris;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -24,6 +26,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
 import static tetris.Piece.pieceMaxWidth;
 import static tetris.Tetris.GameState.*;
@@ -58,11 +67,21 @@ public class PlayField extends JPanel implements ActionListener
     protected static int[] statsArray;
     
     private JPanel menuPanel;
-    private JPanel infoPanel;
+    //private JPanel infoPanel;
+    private JPanel scorePanel;
+    private JLabel levelLabel;
+    private JLabel scoreLabel;
+    private JLabel title;    
+    
+    private JPopupMenu popup;
+    
+    
     private JButton newGameButton;
     private JButton viewHighScoresButton;
     private JButton quitButton;
     private JButton okButton;
+    
+    private JTextArea scores;
     
     private JLabel linesLabel;
     private JLabel highScoreLabel;
@@ -70,12 +89,12 @@ public class PlayField extends JPanel implements ActionListener
     private Font titleFont;
     private Font scoreFont;
     
-    public PlayField() 
+    public PlayField() throws FileNotFoundException, IOException 
     {
         titleFont = new Font("Courier", Font.BOLD, 48);
         scoreFont = new Font("Courier", Font.BOLD, 24);
         
-        newGameButton = new JButton("New Game");
+/*        newGameButton = new JButton("New Game");
         viewHighScoresButton = new JButton("View High Scores");
         quitButton = new JButton("Quit");
         
@@ -111,12 +130,83 @@ public class PlayField extends JPanel implements ActionListener
         
         setBackground(Color.WHITE);
         setFocusable(true);
+        addKeyListener(new KeyPresses());*/
+        
+        
+        
+        newGameButton = new JButton("New Game");
+        viewHighScoresButton = new JButton("View High Scores");
+        quitButton = new JButton("Quit");
+        
+        menuPanel = new JPanel(new BorderLayout());
+        JPanel southmenuPanel = new JPanel();
+        southmenuPanel.add(viewHighScoresButton);
+        southmenuPanel.add(quitButton);
+        southmenuPanel.setBackground(Color.BLACK);
+        
+        newGameButton.setPreferredSize(new Dimension (600,100));
+        viewHighScoresButton.setPreferredSize(new Dimension (297,40));
+        quitButton.setPreferredSize(new Dimension (297,40));
+
+        JPanel centermenuPanel = new JPanel();
+        centermenuPanel.add(newGameButton);
+        centermenuPanel.setBackground(Color.BLACK);
+
+        JPanel northmenuPanel = new JPanel();
+        title = new JLabel(new ImageIcon("menutitle.png"));
+        northmenuPanel.add(title);
+        northmenuPanel.setBackground(Color.BLACK);
+        
+        add(menuPanel);
+        menuPanel.add(northmenuPanel, BorderLayout.NORTH);
+        menuPanel.add(centermenuPanel, BorderLayout.CENTER);
+        menuPanel.add(southmenuPanel, BorderLayout.SOUTH);
+   
+        String fileName = "scores.csv";
+        BufferedReader in = new BufferedReader(new FileReader(fileName));
+        String line = null;
+ //       Font tr = new Font("TimesRoman", Font.PLAIN, 18);
+        scores = new JTextArea("Top 10 Tetris High Scores\n");
+//        scores.setFont(tr);
+        scores.append(String.format("%-20s %-20s%n", "Name", "High Score"));
+       
+        while ((line = in.readLine()) != null) 
+        {
+            String[] scorers = line.split(",");
+            for(String score : scorers)
+            {
+                scores.append(score + "\n");
+            }
+        }
+        in.close();
+        
+        scorePanel = new JPanel(new BorderLayout());
+        add(scorePanel);
+        title = new JLabel(new ImageIcon("scoretitle.png"));
+        scorePanel.add(title, BorderLayout.NORTH);
+        scorePanel.add(scores, BorderLayout.CENTER);
+        scores.setForeground(Color.WHITE);
+        scores.setBackground(Color.BLACK);
+        scorePanel.setVisible(false);
+        okButton = new JButton("OK");
+        scorePanel.add(okButton, BorderLayout.SOUTH);
+        scores.setEditable(false);
+        
+        ButtonListener buttonListener = new ButtonListener();
+        newGameButton.addActionListener(buttonListener);
+        viewHighScoresButton.addActionListener(buttonListener);
+        quitButton.addActionListener(buttonListener);
+        okButton.addActionListener(buttonListener);
+        
+        setBackground(Color.BLACK);
+        setFocusable(true);
         addKeyListener(new KeyPresses());
+        
     }    
     
     class ButtonListener implements ActionListener
     {
-        @Override
+/*        @Override
         public void actionPerformed(ActionEvent event) 
         {
             if (event.getSource() == newGameButton)
@@ -150,7 +240,46 @@ public class PlayField extends JPanel implements ActionListener
             {
                 System.exit(0);
             }
+        }*/
+        
+        @Override
+        public void actionPerformed(ActionEvent event) 
+        {
+            if (event.getSource() == newGameButton)
+            {
+                menuPanel.setVisible(false);        
+                Tetris.gameState = gamePlaying;
+                //infoPanel.setVisible(true);
+                gameOver = false;
+                hasLanded = false;
+                isPaused = false;
+                level = 0;
+                linesCleared = 0;
+                score = 0;
+                start();
+            }
+            else if (event.getSource() == viewHighScoresButton)
+            {
+                menuPanel.setVisible(false); 
+                scorePanel.setVisible(true);
+                okButton.setVisible(true);
+                scores.setVisible(true);
+                Tetris.gameState = highScores;
+            }
+            else if (event.getSource() == okButton)
+            {
+                menuPanel.setVisible(true); 
+                scorePanel.setVisible(false);
+                okButton.setVisible(false);
+                scores.setVisible(false);
+                Tetris.gameState = mainMenu;
+            }
+            else
+            {
+                System.exit(0);
+            }
         }
+        
     }
        
     @Override
@@ -191,7 +320,7 @@ public class PlayField extends JPanel implements ActionListener
     public void paint(Graphics g)
     { 
         // If the game is paused or viewing high scores, do not paint the playfield
-        if ((Tetris.gameState == gamePlaying) || (gameOver == true))
+        if (Tetris.gameState == gamePlaying) 
         {
             // Color each Square with it's color
             super.paint(g);
@@ -199,11 +328,15 @@ public class PlayField extends JPanel implements ActionListener
             
             // Paint the score area
             Color color = Square.colors[0];
-           
+            g.setColor(Color.WHITE);
+            
             int statsStringX = 600;
             int statsStringY = 70;
 
             g2d.setFont(scoreFont);
+            
+            g2d.drawString("LINES - " + linesCleared, 340, 35);
+            
             g2d.drawString("TOP", statsStringX, statsStringY);
             // Change this to top high score
             //g2d.drawString(String.valueOf(score), statsStringX, statsStringY + 25);
@@ -223,12 +356,16 @@ public class PlayField extends JPanel implements ActionListener
             g2d.drawString(String.valueOf(level), statsStringX + 35, statsStringY + 225);
             
             g2d.drawString("STATISTICS", 17, 90);
-            
+
             int squareDimension = 30;
             // Center-ish the playfield
             int x = (800 - (squareDimension * playFieldWidth)) / 2;
             int y = (750 - (squareDimension * playFieldHeight)) / 2;
-
+            
+            color = Color.WHITE;
+            g2d.drawRect(x - 1, y - 1, 302, 662);
+            color = Square.colors[0];            
+            
             int nextX = 575;
             int nextY = 300;
             
@@ -275,6 +412,7 @@ public class PlayField extends JPanel implements ActionListener
                 y += squareDimension;
             }                        
             
+            // Paint the pieces
             x = (800 - (squareDimension * playFieldWidth)) / 2;
             y = (750 - (squareDimension * playFieldHeight)) / 2;
             for (int height = playFieldHeight - 1; height >= 0; height--) 
@@ -335,6 +473,7 @@ public class PlayField extends JPanel implements ActionListener
                 
                 if (height % 3 == 0)
                 {
+                    g.setColor(Color.WHITE);
                     x = squareDimension * 6;
                     if (counter != 7)
                     {
@@ -349,12 +488,10 @@ public class PlayField extends JPanel implements ActionListener
                 }
                 y += squareDimension;
             } 
-            
-            
-            
         }
         else
-        {
+        {           
+            
             super.paint(g);
         }
     }    
@@ -694,9 +831,10 @@ public class PlayField extends JPanel implements ActionListener
                     gameOver = true;
                     hidePlayField();
                     removeNextPieceFromBoard();
-                    infoPanel.setVisible(false);
+                    //infoPanel.setVisible(false);
                     menuPanel.setVisible(false); 
-                    highScoreLabel.setVisible(true);
+                    //highScoreLabel.setVisible(true);
+                    scorePanel.setVisible(true);
                     okButton.setVisible(true);
                     Tetris.gameState = highScores;    
                     timer.stop();
@@ -900,7 +1038,7 @@ public class PlayField extends JPanel implements ActionListener
         //System.out.println("Your # of lines cleared is " + linesCleared);
         //System.out.println("Your level is " + level);
         //Update what is displayed
-        linesLabel.setText("Lines: " + linesCleared);
+        //linesLabel.setText("Lines: " + linesCleared);
         //levelLabel.setText("Level: " + level);
         //scoreLabel.setText("Score: " + score);
     }
